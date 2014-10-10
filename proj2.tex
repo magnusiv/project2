@@ -1,0 +1,305 @@
+\documentclass[a4paper,twocolumn,nofootinbib]{revtex4-1}
+\usepackage[margin=2cm]{geometry}
+% Use Times New Roman Font package
+\usepackage{amsmath, amsfonts, listings, graphicx, wasysym, wrapfig, epigraph}
+\usepackage[none]{hyphenat}
+\setlength\epigraphwidth{8cm}
+\setlength\epigraphrule{0pt}
+
+\usepackage{etoolbox}
+
+\makeatletter
+\patchcmd{\epigraph}{\@epitext{#1}}{\itshape\@epitext{#1}}{}{}
+\makeatother
+
+% Make "Fig. 1:" and "Table 1:" appear in bold
+\usepackage[bf]{caption}
+% Define the ECIO abstract command
+% Define ECIO line spacing and paragraph style
+%\setlength{\baselineskip}{0pt} %
+%\setlength{\parindent}{0pt}%
+%\setlength{\parskip}{0pt}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{color}
+\usepackage{epstopdf}
+\usepackage{textcomp}
+%\usepackage{auto-pst-pdf}
+\definecolor{listinggray}{gray}{0.97}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+
+\lstset{
+	backgroundcolor=\color{listinggray},
+	tabsize=4,
+	rulecolor=,
+	language=[90]Fortran,
+        basicstyle=\scriptsize,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+ %       showstringspaces=false,
+        extendedchars=true,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+%        frame=single,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,1},
+        commentstyle=\color[rgb]{0.133,0.545,0.133},
+        stringstyle=\color[rgb]{0.627,0.126,0.941},
+}
+
+% operations etc
+\newcommand{\der}[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}
+\newcommand{\del}[2]{\frac{\Delta #1}{\Delta #2}}
+\newcommand{\pow}[2]{#1\cdot 10^{#2}}
+\newcommand{\parrt}[3]{\left( \frac{\partial #1}{\partial #2} \right)_{#3}}
+\newcommand{\parr}[2]{ \frac{\partial #1}{\partial #2}}
+\newcommand{\dd}[1]{\mathrm{d}#1}
+\newcommand{\summ}[3]{\sum_{#1}^{#2} #3 }
+\newcommand{\summpa}[3]{\sum_{#1}^{#2} \left( #3 \right) }
+\newcommand{\oin}[4]{\oint_{#1}^{#2} \! #3 \, \mathrm{d} #4}
+\newcommand{\nin}[4]{\int\limits_{#1}^{#2} \! #3 \, \mathrm{d} #4}
+\newcommand{\fing}{\int \! \mathrm{d}^4 x \sqrt{-g}}
+\newcommand{\fin}{\int \! \mathrm{d}^4 x}
+\newcommand{\finlim}[2]{\int_{#1}^{#2} \! \mathrm{d}^4 x}
+\newcommand{\variate}[2]{\dfrac{\delta #1}{\delta #2}}
+\newcommand{\covder}{\partial_{\mu \nu}}
+\newcommand{\conder}{\partial^{\mu \nu}}
+\newcommand{\covric}{R_{\mu \nu}}
+\newcommand{\conric}{R^{\mu \nu}}
+\newcommand{\christ}[3]{\Gamma_ {#1 #2}^{#3}}
+\newcommand{\tr}{\text{Tr}}
+\newcommand{\dcov}{D_\mu}
+\newcommand{\dcon}{D^\mu}
+
+% Variables and constants
+\newcommand{\lam}{\Lambda}
+\newcommand{\ro}{\rho_0}
+\newcommand{\rhm}{\rho_m}
+\newcommand{\rrel}{\rho_\text{rel}}
+\newcommand{\rvac}{\rho_\text{vac}}
+\newcommand{\rlam}{\rho_\Lambda}
+\newcommand{\omO}{\Omega_0}
+\newcommand{\omm}{\Omega_m}
+\newcommand{\omrel}{\Omega_\text{rel}}
+\newcommand{\omvac}{\Omega_\text{vac}}
+\newcommand{\omlam}{\Omega_\Lambda}
+\newcommand{\at}{a(t)}
+\newcommand{\atdot}{\dot{a}(t)}
+\newcommand{\adot}{\dot{a}}
+\newcommand{\ho}{H_0}
+\newcommand{\htt}{H(t)}
+\newcommand{\gcov}{g_{\mu \nu}}
+\newcommand{\gcon}{g^{\mu \nu}}
+\newcommand{\cov}{_{\mu \nu}}
+\newcommand{\con}{^{\mu \nu}}
+\newcommand{\eipig}{8\pi G}
+\newcommand{\pig}{\pi G}
+
+% mic.
+\newcommand{\bol}[1]{\boldsymbol{#1}}
+\newcommand{\uni}[1]{\hat{\boldsymbol{a_{#1}}}}
+\renewcommand{\Bbb}{\mathbb}
+\newcommand{\eqqref}[1]{eq. \eqref{#1}}
+
+\newcommand\ECIOAbstract[1]{\noindent\textbf{Abstract:} \textit{#1}}
+
+\begin{document}
+\title{Project 2, Computational physics}
+\author{Magnus Fagernes Ivarsen}
+\maketitle
+\ECIOAbstract{In this report numerical solution of a quantum mechanical problem concerning interacting particles in a potential is presented and elaborated upon. The algorithm used is explained, but not derived, and details, like peculierities in the algorithm, that require special attention receive adequate treatment.}
+
+\section*{Introduction}
+Electrons can find themselves in external potentials for several reasons, and once there they will interact with other charged particles through Coloumb interaction. In quantum mechanics, the governing equations are simple to solve both analytically (with limitations) and numerically (without limitations.) Beginning with a single electron, the case of two is easier to tackle.
+\section*{One electron in an SHO}
+Consider an electron in a three-dimensional harmonic
+oscillator potential, which being in a spherical symmetric potential well will described by a spherically symmetric wavefunction. The radial part of the Schr\"odinger equation for one electron reads
+\[
+\begin{cases}
+  -\dfrac{\hbar^2}{2 m} \left ( \dfrac{1}{r^2} \dfrac{d}{dr} r^2
+  \dfrac{d}{dr} - \dfrac{l (l + 1)}{r^2} \right )R(r) \\
+    \;\;\;\;\;\;\;\;\;\;\;\; + V(r) R(r) = E R(r).\\ 
+     \\
+     \;\; |R(0)| < \infty \text{ and } R(\infty) = 0.
+\end{cases}
+\]
+$V(r)$ is the harmonic oscillator potential $(1/2)kr^2$ with
+$k=m\omega^2$ and $E$ is
+the energy eigenvalues of the harmonic oscillator in three dimensions:
+\[
+E_{m\ell}=  \hbar \omega \left(2m+\ell+\frac{3}{2}\right),
+\]
+where the quantum numbers are $m=0,1,2,\dots$ and $l=0,1,2,\dots$.
+Since we have made a transformation to spherical coordinates it means that 
+$r\in [0,\infty)$.  
+By dimensionally convenient substitutions $R(\rho) = (\alpha/\rho) u(\rho)$, $V(\rho)=k\alpha^2\rho^2/2$ and $\lambda=(2m\alpha 2/\hbar^2)E$ with the dimensional constant $\alpha$ defined by $mk\alpha^4=\hbar^2$, in addition to neglecting freedom in the angular momentum quantum number $\ell=0$, the problem at hand becomes
+
+\[
+\begin{cases}  \left( -\dfrac{\mathrm{^2}}{\mathrm{\rho^2}}  
+       + \rho^2\right ) u(\rho)  = \lambda u(\rho) ,\\
+       \\
+       \;\; u(0)=0 \text{ and } u(\infty)=0. \end{cases}
+\]
+As indicated above, an analytical solution exists, and the eigenvalues for $l=0$ are 
+$\lambda_0=3,\lambda_1=7,\lambda_2=11,\dots .$
+The expression for the second derivative of a discretized function $u={u_i}_i$ are approximated by
+\begin{multline*}
+-\frac{u_{i+1} -2u_i +u_{i-1}}{h^2}+\rho_i^2u_i=\\
+-\frac{u_{i+1} -2u_i +u_{i-1} }{h^2}+V_iu_i  = \lambda u_i,
+\end{multline*}
+where $h = \rho_\text{max}/n$ is the step length in the discretized approximation. In matrix form, the problem is presented by
+\begin{equation}\label{eigvalprob}
+A\boldsymbol{u} = \lambda \boldsymbol{u}
+\end{equation}
+ where
+\begin{widetext}
+\begin{equation}
+   A= \left( \begin{array}{ccccccc} \frac{2}{h^2}+V_1 & -\frac{1}{h^2} & 0   & 0    & \dots  &0     & 0 \\
+                                -\frac{1}{h^2} & \frac{2}{h^2}+V_2 & -\frac{1}{h^2} & 0    & \dots  &0     &0 \\
+                                0   & -\frac{1}{h^2} & \frac{2}{h^2}+V_3 & -\frac{1}{h^2}  &0       &\dots & 0\\
+                                \dots  & \dots & \dots & \dots  &\dots      &\dots & \dots\\
+                                0   & \dots & \dots & \dots  &\dots       &\frac{2}{h^2}+V_{n_{\mathrm{step}}-2} & -\frac{1}{h^2}\\
+                                0   & \dots & \dots & \dots  &\dots       &-\frac{1}{h^2} & \frac{2}{h^2}+V_{n_{\mathrm{step}}-1}
+
+             \end{array} \right),
+\label{eq:matrixse} 
+\end{equation}
+\end{widetext}
+and $\boldsymbol{u}$ is the eigenvector containing all the discretized steps of the transformed radial wavefunction, and $\lambda$ its corresponding energy eigenvalue. The boundary values at $i=0$ and $i=n$ is intrinsically included as being zero on either "end" of the matrix. Solving this eigenvalue problem will yield solutions for all $n-1$ energy states.
+\subparagraph{Comments}
+There are a few interesting observations to be made when making a matrix eigenvalue formulation of a quantum eigenstate problem. Firstly, it \textit{does not represent a discretized solution to a quantum eigenvalue problem,}\footnote{though the matrix eigenvalue problem \textit{itself} is indeed solved discretely!} instead every eigenvalue and eigenvector is presented simultanously as it were, unsorted. Second, even though quantum operators has a matrix representation in suitable bases, this is \textit{not} the case with our matrix $A$, it does not represent the differential operator of the Schr\"odinger equation in any basis, but is rather a result of the discretized nature of the solution.\footnote{This means that even though the basis formed by $A$'s eigenvectors are approximized solutions to the Schr\"odinger equation, \textit{they need not form an orthogonal basis,} and thus not the basis formed by a quantum operator matrix.} Third, as the eigenvalues correspond to an electron in a bound state, precautions must be taken to assure that the relevant energy eigenstates are well below the walls of the potential well; the maximum potential must be much larger than the highest eigenstate we consider interesting, and each eigenstate increase in accuracy when $\rho_\text{max}$ approaches infinity, in addition to the well known increase in accuracy due to decreased step length. In other words, we need to consider both the convergence of the \textit{method} and the \textit{model}, here the method will be the Jacobi rotation method coupled with the classic Taylor expansion expression for $u''(\rho)$, and the model is the assumptions that the discritized approximation is sufficently smooth and that $\rho_\text{max}$ is sufficently close to infinity.
+\subparagraph{Algorithm}
+In the Jacobi algorithm, successive rotations $R_i$ is performed on $A$, $A$ being a symmetric matrix, each causing one off-diagonal element to be zeroed. That is,
+\begin{equation} R_1R_2\dots \; A\;(R_1R_2\dots )^T = D, \end{equation}
+where $D$ is diagonal, as per standard eigenvalue problem methodology. The rotations are performed successively, working through the "shells" of transformations in eq. (2). Each transformation zeroes two off-diagonal elements each, on the condition that
+[from the equations resulting from the rotation (on page 216 in the lecture notes)]
+\[ \frac{a_{\ell \ell}-a_{kk}}{a_{k\ell}}=\frac{c^2-s^2}{sc}\equiv 2\tau, \] where $s\equiv \sin \theta  $ and $c \equiv \cos \theta$, $\theta$ being the angle of rotation. Using that $\tan \theta \equiv t = s/c$, this is equivalent to
+\[ \frac{s^2}{c^2}-1 + 2\tau \frac{s}{c}= t^2+ 2\tau t-1=0,\]
+which is solved by \begin{equation} t = -\tau \pm \sqrt{1+\tau^2}.\end{equation} Now, for each step, 
+\[ ||R_iAR_i^T -A||_F^2=4(1-c)\sum_{i=1,i\ne k,l}^n(a_{ik}^2+a_{il}^2) +\frac{2a_{kl}^2}{c^2}, \]
+so we want $c$ to be \textit{maximized}. As $c=(1+t^2)^{-1/2}$, this is obtained by \textit{minimizing} $t$. The lowest absolute-value of eq. (3) is of course obtained by taking the sign that corresponds to
+\begin{equation}\label{tsol}
+t = -\tau +\text{Sgn }\tau \; \sqrt{1+\tau^2},
+\end{equation}
+where $\text{Sgn }x$ is the sign-operator equal to 1 with the sign of $x$, as we then effectively take the distance between $|\tau|$ and $\sqrt{1+\tau 2}$ on the number line. As the subtraction of two very nearly equal numbers can create round-off errors, we manipulate according to
+\begin{align*}
+&-\tau +\text{Sgn }\tau \; \sqrt{1+\tau^2} =\\
+&= (\text{Sgn }\tau \; \sqrt{1+\tau^2} -\tau)\frac{\text{Sgn }\tau \; \sqrt{1+\tau^2} + \tau}{\text{Sgn }\tau \; \sqrt{1+\tau^2}+\tau}\\
+&=\frac{1+\tau^2-\tau^2}{\tau+\text{Sgn }\tau \; \sqrt{1+\tau^2}}\\
+&= \frac{\text{Sgn }\tau }{|\tau| +\sqrt{1+\tau^2}}.
+\end{align*}
+This is more comfortable for a computer to work with. Furthermore, from the equations on page 216 in the lecture notes, zeroing the transformed off-diagonal elements, we see that
+\[s^2 a_{\ell \ell} = s^2 a_{kk}+t(s^2-c^2)a_{k \ell}. \] This can be inserted into the equation for the transformed diagonal elements $a_{kk}'$, yielding
+\begin{multline*} 
+a_{kk}' = c^2a_{kk} +s^2a_{\ell \ell} - 2sc a_{kl}  \\
+=(c^2+s^2)a_{kk}-[t(s^2-c^2)+2sc]a_{k\ell}=a_{kk}-ta_{k\ell},
+\end{multline*}
+and in an entirely equivalent manner,
+\[ a_{\ell \ell}' = a_{\ell \ell}+ ta_{k\ell}, \] in addition to (again, from page 216 in the lecture notes)
+\[a_{ik}' = ca_{ik}-sa_{i\ell} \text{ and } a_{i\ell}' = c a_{i\ell} + s a_{ik},\] where $i\neq k$ and $i\neq \ell$.
+The algorithm would then start by defining a tolerence, the lowest value the sum of the off-diagonal elements of the transformed matrix can have, then perform the rotations using the expressions above. The end matrix would then be a diagonal matrix containing all the matrix eigenvalues. Written in Fortran, here is how the main algorithm would look like:
+
+\newpage
+
+\begin{lstlisting}[title={Jacobi rotation algorithm}]
+!for each rotation, do
+  tau  = ( a(q,q)-a(p,p) )/( 2.0_dp*a(p,q) )
+  t    = 1.0_dp/(ABS(tau)+SQRT(tau**2.0_dp+1))
+  IF (tau .LT. 0.0_dp) t = -t
+  c        = 1.0_dp/SQRT(1.0_dp+t**2.0_dp)
+  s        = t*c
+  offdiag1 = t*a(p,q)
+  a(p,p)   = a(p,p) - offdiag1 ! direct diagonal
+  d(p)     = a(p,p)	           ! vector w/diag
+  a(q,q)   = a(q,q) + offdiag1 ! direct diagonal
+  d(q)     = a(q,q)	           ! vector w/diag
+  a(p,q)   = 0.0_dp	           ! direct offdiag
+  DO j=1,p-1
+    offdiag1 = a(j,p)
+    offdiag2 = a(j,q)
+    a(j,p)   = c*offdiag1 - s*offdiag2
+    a(j,q)   = c*offdiag2 + s*offdiag1
+  END DO
+  DO j=p+1,q-1
+    offdiag1 = a(p,j)
+    offdiag2 = a(j,q)
+    a(p,j)   = c*offdiag1 - s*offdiag2
+    a(j,q)   = c*offdiag2 + s*offdiag1
+  END DO
+  DO j=q+1,n
+    offdiag1 = a(p,j)
+    offdiag2 = a(q,j)
+    a(p,j)   = c*offdiag1 - s*offdiag2
+    a(q,j)   = c*offdiag2 + s*offdiag1
+  END DO
+\end{lstlisting}
+\section*{Two interacting electrons}
+Luckily, when studying two interacting electrons a vitally simplifying feature is the reduction of two-body problems to one-body problems;
+due to energy conservation, the center of mass is stationary while the wavefunction describing the radial displacement behaves like a one-particle wavefunction, in
+the quantum mechanical case, this means the wavefunction (which is common to both electrons) is factored into a center of mass factor and a relative displacement factor.
+Defining the 
+wavefunction $u'(\rho')$ in this case to be the mutual displacement wavefunction and the variable
+$\rho'$ to again be the the dimensionless variable (but scaled differently,) the Schr\"odinger equation reads
+\[
+ \begin{cases}
+  -\dfrac{\dd{^2u'}}{\dd{\rho'^2}}+\left( \omega^2 \rho'^2+\dfrac{1}{\rho'} \right) u' = \lambda'u'\\
+  \\
+  u(0)=u(\infty)=0,
+ \end{cases}
+\]
+where $\omega$ reflects interaction strength and $\lambda'$ is scaled differently from the one-electron case. The only difference to implement in the program used in the previous section is to modify the potential $V_i$ according to the above expression.
+\subsection*{Eigenvectors, the wave function}
+In eq. \eqref{eigvalprob}, multiply the composite rotation transformation matrix transversed, $R^T$,
+from the left:
+\[ R^TA\bol{u}=DR^T\bol{u}=\lambda'R^T\bol{u},\]
+since $DR^T=R^TARR^T=R^TA$, where $D$ is diagonal transformed matrix. In other words, the vector $R^T\bol{u}$
+is an eigenvector of the diagonal matrix $D$, with eigenvalues $\lambda'$. But $D$ is, as mentioned, diagonal, making
+\textit{the unit vectors} $\{\bol{e}_i\}_{i=1,\cdots,n}$ into a suitable basis. That is to say,
+\[ D\bol{e}=\lambda'\bol{e},\]
+where $R^T\bol{u}=\bol{e}$ is the unit vector. All we have to do then is to transform back: \[ R R^T\bol{u}=\bol{u}=R\bol{e}.\]
+The eigenvectors of $A$ are columns of the total transformation matrix $R$, and since this is a unitary matrix, they come out normalized.
+The eigenvector implementation to be done to the program is then simply to perform each rotation to an identity matrix (the unit vectors organized as columns:)
+\begin{lstlisting}[title={Eigenvector update}]
+!for each rotation, do also
+  DO j=1,n
+    offdiag1 = E(j,p)
+    offdiag2 = E(j,q)
+    E(j,p)   = c*offdiag1 - s*offdiag2
+    E(j,q)   = c*offdiag2 + s*offdiag1
+  END DO
+\end{lstlisting}
+The location of the ground state energy eigenvalue marks the location of the transformation matrix column that represents the ground state eigenfunction.
+\section*{Results}
+\subparagraph{Computing single-electron eigenvalues} A program that sets all the initial quantities can easily produce eigenvalues up to a given accuracy. Such a program,
+\texttt{jacobi.f90}, combined with a short python script \texttt{shower.py} for sorting the eigenvalues after value, produced the first three eigenvalues (3,7 and 11) to within $10^{-3}$ accuracy, which a combination
+of $n=500$ and $\rho_\text{max}=7$ assured.\footnote{All programs can be found at ...}
+\subparagraph{Computing two-electron eigenvalues} A modification of the program used above, \texttt{jacobi2.f90},
+in combination with the simple \texttt{shower2.py}, produces two-electron mutual displacement eigenvalues as a function of reciprocal
+interaction strength, $\omega^{-1}$. Values of $n$ and $\rho_\text{max}$ were found, after a bit of experimenting,to be suitable
+at $80$ and $4.3$ respectively, as the ground state energy then was computed (with the first program!) to whitin a precision of $10^{-3}$.
+The behaviour exhibited (shown in figure 1) matches that of the numerical solution
+in Taut (1993).\footnote{'Two electrons in an external oscillator potential: Particular analytic solutions of a Coulomb correlation problem', in \textit{Phys. Rev. A} by M. Taut (1993)}
+\subparagraph*{Computing eigenfunctions}
+A modification of \texttt{jacobi3.f90} limits the $\omega$ values to discreetely, 0.01, 0.5, 1 and 5, with the transformation matrix update appended to the main rotation algorithm. The eigenvectors are written to files for \texttt{shower3.py} to read and plot.
+Figure 2 shows the eigenfunctions for the chosen values of $\omega$, with the same . Interestingly, as shown in figure 3, the values of
+$n$ and $\rho_\text{max}$ that were landed upon when computing two-electron eigenvalues apperently did not give an especially correct
+value of the eigenfunctions; but as both variables were increased drastically, the eigenfunction curves seems to converge.
+\section*{Discussion} For discussion about the methodology, see the 'Comments' section above. The results are predictable,
+but a few comments on the results are in order. Ss was mentioned in the 'Comments' section, the fact that
+$\rho_\text{max}$ must be sufficently close to infinity is not beneficial to the computations. Firstly, as can be seen from
+the convergence for each rotation from $A$ to $A'$,
+\[ |\text{off }^2A'-\text{off }^2A|=2a_{ij,\;i\neq j}^2 = 2\frac{n^4}{\rho_\text{max}^4},\]
+an increasing $\rho_{max}$ lowers the efficency of the method \textit{drastically.} So the accuracy requires $n$ to
+increase accordingly, which again increases the number of FLOPs, as FLOPs $\propto n^3$. Second, as shown in figure 3,
+the eigenfunctions, which correctly fall off to zero at $\rho_\text{max}$, exhibit a dependency of $\rho_\text{max}$
+that is unfortunate indeed; if infinity is to be physically correctly represented by $rho_\text{max}$ that sort of
+dependency should not be there; this would probably be obtained for sufficently large value of $rho_\text{max}$ and thus large matrices.
+
+
+
+\end{document}
+
