@@ -1,6 +1,3 @@
-# adal.f90 plotter. See adal.f90 for
-# matrix sizes and name format. 
-
 import numpy as np
 import matplotlib.pyplot as plt
 
