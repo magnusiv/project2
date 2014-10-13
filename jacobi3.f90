@@ -16,14 +16,6 @@ REAL(dp) :: sum,offdiag1,offdiag2,t,s,c,tau,gamma
 CHARACTER(len=1024) :: FMT = '(I2.2)'
 CHARACTER(len=1024) :: stri
 
-! zero-ing:  matrices a,v
-!            vectors b,d,z
-! a is unput matrix and v is identity
-! d and b are vectors containing the diag of a
-! z vector will accumulate terms of the form tau*a_pq
-! nrot is a number that counts rotations
-  
-
 omega = [0.01_dp,0.5_dp,1.0_dp,5.0_dp]
 
 DO l =1,4
