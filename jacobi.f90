@@ -13,14 +13,6 @@ REAL(dp),PARAMETER :: threshold = 10.0_dp**(-6.0_dp)
 INTEGER :: i,p,q,j,k,rotations
 REAL(dp) :: sum,offdiag1,offdiag2,t,s,c,tau,gamma
 
-! zero-ing:  matrices a,v
-!            vectors b,d,z
-! a is unput matrix and v is identity
-! d and b are vectors containing the diag of a
-! z vector will accumulate terms of the form tau*a_pq
-! nrot is a number that counts rotations
-
-
 rotations = 0
 
 DO i = 1, n ! Zeroing
@@ -74,11 +66,6 @@ DO k=1,max_rot
          END IF
       END DO
    END DO
-   
-!   DO p = 1,n-1
-!      DO q = p+1,n
-
-         !      h=d(q)-d(p) wat
 
          tau      = ( a(q,q)-a(p,p) )/( 2.0_dp*a(p,q) )
          t        = 1.0_dp/( ABS(tau)+SQRT(tau**2.0_dp+1) )
@@ -92,19 +79,19 @@ DO k=1,max_rot
          a(q,q)   = a(q,q) + offdiag1
          a(p,q)   = 0.0_dp
          
-         DO j=1,p-1 ! Case of rotations 1 ≤ j < p.
+         DO j=1,p-1 
             offdiag1 = a(j,p)
             offdiag2 = a(j,q)
             a(j,p)   = offdiag1 - s*(offdiag2+offdiag1*gamma)
             a(j,q)   = offdiag2 + s*(offdiag1-offdiag2*gamma)
          END DO
-         DO j=p+1,q-1 ! Case of rotations p < j < q.
+         DO j=p+1,q-1 
             offdiag1 = a(p,j)
             offdiag2 = a(j,q)
             a(p,j)   = offdiag1 - s*(offdiag2+offdiag1*gamma)
             a(j,q)   = offdiag2 + s*(offdiag1-offdiag2*gamma)
          END DO
-         DO j=q+1,n ! Case of rotations q < j ≤ n.
+         DO j=q+1,n 
             offdiag1 = a(p,j)
             offdiag2 = a(q,j)
             a(p,j)   = offdiag1 - s*(offdiag2+offdiag1*gamma)
@@ -113,11 +100,8 @@ DO k=1,max_rot
          
          rotations = rotations + 1
 
-!      END DO
-!   END DO
 END DO
 
-!PAUSE ’too many iterations in jacobi’
 STOP
 
 END PROGRAM jacobi
